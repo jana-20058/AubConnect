@@ -1,4 +1,4 @@
-AubConnect 📚⭐
+AubConnect 📚⭐  
 A course and professor review platform for AUB students.  
 
 Features  
