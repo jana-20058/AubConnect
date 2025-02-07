@@ -1,0 +1,65 @@
+h1{
+    font-family: 'Montserrat';
+}
+h2{
+    font-size: 30px;
+    font-family: 'Montserrat';
+}
+p{
+    font-family:Verdana, Geneva, Tahoma, sans-serif
+}
+header{
+    background-color: #860033;
+    display: flex;
+    justify-content: space-between;
+    height: 70px;
+}
+.logo{
+    height: 40px;
+    width: auto;
+}
+.navbar{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #860033;
+
+}
+.navbar a{
+    color:  #ddd;
+    text-decoration: none;
+    padding: 14px 20px;
+    font-family: 'Poppins';
+    justify-content: flex-end;
+    transition: 0.1s;
+    font-size: 13px;
+}
+.logo-container{
+    flex:1;
+}
+.links-container{
+    display: flex;
+    font-size: 13px;
+    justify-content: flex-end;
+}
+.navbar a:hover{
+    background-color: transparent;
+    color: white;
+}
+button{
+    font-size: 20px;
+    background-color:#860033 ;
+    color: white;
+    padding: 12px 24px;
+    border:none;
+    cursor: pointer;
+    transition: 0.1s;
+    border-radius: 10px;
+}
+button:hover{
+    background-color: #5C0014;
+}
+.signup{
+    background-color: #800020;
+    color: white;
+}
