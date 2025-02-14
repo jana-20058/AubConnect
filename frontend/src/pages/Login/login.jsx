@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom"; // Import Link for navigation
 import "./login-style.css";
 import "boxicons/css/boxicons.min.css";
 
@@ -34,9 +34,14 @@ const Login = () => {
         <button type="submit" className="login-btn">Login</button>
 
         <div className="signup-redirect">
-          New user? <Link to="/">Sign Up</Link> {/* or "/signup" if using Solution 2 */}
+          New user? <Link to="/signup">Sign Up</Link> {/* Link to signup */}
         </div>
       </form>
+
+      {/* Back to Home Button */}
+      <div className="back-to-home">
+        <Link to="/" className="back-btn">Back to Home</Link>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link for navigation
 import "./signup-style.css";
 import "boxicons/css/boxicons.min.css";
-
 
 const Signup = () => {
   const [password, setPassword] = useState("");
@@ -102,9 +102,14 @@ const Signup = () => {
         <button type="submit" className="signup-btn">Sign Up</button>
 
         <div className="login-redirect">
-          Already a registered user? <a href="/login">Login</a>
+          Already a registered user? <Link to="/login">Login</Link> {/* Link to login */}
         </div>
       </form>
+
+      {/* Back to Home Button */}
+      <div className="back-to-home">
+        <Link to="/" className="back-btn">Back to Home</Link>
+      </div>
     </div>
   );
 };

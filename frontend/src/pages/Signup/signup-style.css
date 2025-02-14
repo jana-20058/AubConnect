@@ -176,3 +176,32 @@ input:focus {
   font-size: 16px;
   color: #d32f2f;
 }
+
+/* Back to Home Button */
+.back-to-home {
+  margin-top: 20px;  /* Adjust space between button and form */
+  display: flex;
+  justify-content: center;
+}
+
+.back-btn {
+  background-color: #f2f2f2;  /* Lighter background to make it less prominent */
+  color: #7f7f7f;  /* Dimmer color */
+  border: 1px solid #ccc;  /* Border to make it subtle */
+  padding: 8px 0;  /* Adjust padding to make it smaller */
+  width: 100%;  /* Ensure the button is the same width as the input fields */
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: normal;  /* Use a lighter font-weight for secondary actions */
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  background-color: #e0e0e0;  /* Even lighter background on hover */
+  color: #5a5a5a;  /* Darker text color on hover for contrast */
+  border-color: #bbb;  /* Subtle border change on hover */
+}
+
