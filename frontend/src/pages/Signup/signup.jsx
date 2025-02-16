@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for redirection
-import axios from "axios"; // Import axios
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./signup-style.css";
 import "boxicons/css/boxicons.min.css";
 
@@ -14,9 +14,11 @@ const Signup = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordConfirmVisible, setPasswordConfirmVisible] = useState(false);
-  const [username, setUsername] = useState(""); // Add username state
-  const [error, setError] = useState(""); // For backend errors
-  const navigate = useNavigate(); // For redirection after successful signup
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [verificationCode, setVerificationCode] = useState(""); // State for verification code
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false); // State to control popup visibility
+  const navigate = useNavigate();
 
   const requirements = [
     { regex: /.{8,}/, id: "lengthReq", text: "At least 8 characters" },
@@ -67,40 +69,52 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent page refresh
-  
-    // Validate email and password
-    validateEmailFormat();
-    validatePasswordMatch();
-  
-    if (emailError || passwordError || passwordFormateError) {
-      return; // Stop if there are validation errors
-    }
-  
+  // Function to send verification code
+  const sendVerificationCode = async () => {
     try {
-      // Send a POST request to the backend
+      await axios.post("http://localhost:5001/api/auth/send-verification-code", { email });
+      setShowVerificationPopup(true); // Show the verification popup
+      setError(""); // Clear any previous errors
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send verification code");
+    }
+  };
+
+  // Function to verify the code
+  const verifyCode = async () => {
+    try {
+      await axios.post("http://localhost:5001/api/auth/verify-code", { email, verificationCode });
+
+      // If verification is successful, proceed with signup
       const response = await axios.post("http://localhost:5001/api/auth/signup", {
-        name: username, // Use the username as the name
+        name: username,
         username,
         email,
         password,
       });
-  
+
       // Handle successful signup
       console.log("Signup successful:", response.data);
       navigate("/login"); // Redirect to the login page
     } catch (err) {
-      // Log the full error object
-      console.error("Signup error:", err);
-  
-      // Display a more specific error message
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Signup failed. Please try again."
-      );
+      setError(err.response?.data?.message || "Invalid or expired verification code");
     }
+  };
+
+  // Function to handle signup
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate email and password
+    validateEmailFormat();
+    validatePasswordMatch();
+
+    if (emailError || passwordError || passwordFormateError) {
+      return; // Stop if there are validation errors
+    }
+
+    // Send verification code and show popup
+    await sendVerificationCode();
   };
 
   return (
@@ -130,6 +144,7 @@ const Signup = () => {
           />
         </div>
         {emailError && <p className="error-message"><i className="bx bx-error-circle"></i> {emailError}</p>}
+
         <div className="group">
           <i
             className={`bx ${passwordVisible ? "bx-lock-open" : "bx-lock"} group-i`}
@@ -211,6 +226,24 @@ const Signup = () => {
           Back to Home
         </Link>
       </div>
+
+      {/* Verification Popup */}
+      {showVerificationPopup && (
+        <div className="verification-popup">
+          <div className="popup-content">
+            <h3>Verify Your Email</h3>
+            <p>We've sent a verification code to your email. Please enter it below:</p>
+            <input
+              type="text"
+              placeholder="Verification Code"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+            />
+            <button onClick={verifyCode}>Verify</button>
+            <button onClick={() => setShowVerificationPopup(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
