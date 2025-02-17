@@ -8,38 +8,32 @@ const generateVerificationCode = () => {
   return crypto.randomInt(100000, 999999).toString();
 };
 
+
 const sendVerificationCode = async (req, res) => {
   const { name, username, email, password } = req.body;
 
   try {
-    // Check if the email is already registered
-    const existingUser = await User.findOne({ email });
+    // Check if the email or username is already registered
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered', error: 'EMAIL_ALREADY_EXISTS' });
-    }
-
-    // Check if the username is already taken
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: 'Username is already taken', error: 'USERNAME_ALREADY_EXISTS' });
+      return res.status(400).json({ message: 'Email or username already registered', error: 'EMAIL_OR_USERNAME_EXISTS' });
     }
 
     // Generate a verification code
     const verificationCode = generateVerificationCode();
 
-    // Save the user data and verification code
-    await User.findOneAndUpdate(
-      { email },
-      {
-        name,
-        username,
-        email,
-        password,
-        verificationCode,
-        verificationCodeExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
-      },
-      { upsert: true, new: true }
-    );
+    // Create a new user document
+    const user = new User({
+      name,
+      username,
+      email,
+      password,
+      verificationCode,
+      verificationCodeExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
+    });
+
+    // Save the user document (this will trigger the pre('save') hook)
+    await user.save();
 
     // Send the verification code via email
     await sendVerificationEmail(email, verificationCode);
@@ -50,6 +44,49 @@ const sendVerificationCode = async (req, res) => {
     res.status(500).json({ message: 'Failed to send verification code', error: err.message });
   }
 };
+
+// const sendVerificationCode = async (req, res) => {
+//   const { name, username, email, password } = req.body;
+
+//   try {
+//     // Check if the email is already registered
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ message: 'Email already registered', error: 'EMAIL_ALREADY_EXISTS' });
+//     }
+
+//     // Check if the username is already taken
+//     const existingUsername = await User.findOne({ username });
+//     if (existingUsername) {
+//       return res.status(400).json({ message: 'Username is already taken', error: 'USERNAME_ALREADY_EXISTS' });
+//     }
+
+//     // Generate a verification code
+//     const verificationCode = generateVerificationCode();
+
+//     // Save the user data and verification code
+//     await User.findOneAndUpdate(
+//       { email },
+//       {
+//         name,
+//         username,
+//         email,
+//         password,
+//         verificationCode,
+//         verificationCodeExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
+//       },
+//       { upsert: true, new: true }
+//     );
+
+//     // Send the verification code via email
+//     await sendVerificationEmail(email, verificationCode);
+
+//     res.status(200).json({ message: 'Verification code sent successfully' });
+//   } catch (err) {
+//     console.error('Error sending verification code:', err);
+//     res.status(500).json({ message: 'Failed to send verification code', error: err.message });
+//   }
+// };
 
 // Send verification code to the user's email
 // const sendVerificationCode = async (req, res) => {

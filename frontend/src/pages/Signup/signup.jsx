@@ -95,7 +95,7 @@ const Signup = () => {
       setError(err.response?.data?.message || "Invalid or expired verification code");
     }
   };
-  
+
   // Function to verify the code
   // const verifyCode = async () => {
   //   try {
@@ -144,6 +144,33 @@ const Signup = () => {
       setError(err.response?.data?.message || "Failed to send verification code");
     }
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  
+  //   // Validate email and password
+  //   validateEmailFormat();
+  //   validatePasswordMatch();
+  
+  //   if (emailError || passwordError || passwordFormateError) {
+  //     return; // Stop if there are validation errors
+  //   }
+  
+  //   try {
+  //     // Send user data to the backend and request a verification code
+  //     await axios.post("http://localhost:5001/api/auth/send-verification-code", {
+  //       name: username,
+  //       username,
+  //       email,
+  //       password,
+  //     });
+  
+  //     // Show the verification popup
+  //     setShowVerificationPopup(true);
+  //     setError(""); // Clear any previous errors
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Failed to send verification code");
+  //   }
+  // };
 
   // Function to handle signup
   // const handleSubmit = async (e) => {
