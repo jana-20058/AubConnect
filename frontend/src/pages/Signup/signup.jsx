@@ -83,39 +83,21 @@ const Signup = () => {
   const verifyCode = async () => {
     try {
       // Verify the code
-      await axios.post("http://localhost:5001/api/auth/verify-code", { email, verificationCode });
+      const verifyResponse = await axios.post("http://localhost:5001/api/auth/verify-code", { email, verificationCode });
   
       // If verification is successful, proceed with signup
-      const response = await axios.post("http://localhost:5001/api/auth/signup", { email });
+      if (verifyResponse.data.token) {
+        // Save the token (e.g., in localStorage or context)
+        localStorage.setItem('token', verifyResponse.data.token);
   
-      // Handle successful signup
-      console.log("Signup successful:", response.data);
-      navigate("/login"); // Redirect to the login page
+        // Redirect to the login page or dashboard
+        navigate("/login");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid or expired verification code");
     }
   };
 
-  // Function to verify the code
-  // const verifyCode = async () => {
-  //   try {
-  //     await axios.post("http://localhost:5001/api/auth/verify-code", { email, verificationCode });
-
-  //     // If verification is successful, proceed with signup
-  //     const response = await axios.post("http://localhost:5001/api/auth/signup", {
-  //       name: username,
-  //       username,
-  //       email,
-  //       password,
-  //     });
-
-  //     // Handle successful signup
-  //     console.log("Signup successful:", response.data);
-  //     navigate("/login"); // Redirect to the login page
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Invalid or expired verification code");
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,49 +126,6 @@ const Signup = () => {
       setError(err.response?.data?.message || "Failed to send verification code");
     }
   };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  
-  //   // Validate email and password
-  //   validateEmailFormat();
-  //   validatePasswordMatch();
-  
-  //   if (emailError || passwordError || passwordFormateError) {
-  //     return; // Stop if there are validation errors
-  //   }
-  
-  //   try {
-  //     // Send user data to the backend and request a verification code
-  //     await axios.post("http://localhost:5001/api/auth/send-verification-code", {
-  //       name: username,
-  //       username,
-  //       email,
-  //       password,
-  //     });
-  
-  //     // Show the verification popup
-  //     setShowVerificationPopup(true);
-  //     setError(""); // Clear any previous errors
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Failed to send verification code");
-  //   }
-  // };
-
-  // Function to handle signup
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   // Validate email and password
-  //   validateEmailFormat();
-  //   validatePasswordMatch();
-
-  //   if (emailError || passwordError || passwordFormateError) {
-  //     return; // Stop if there are validation errors
-  //   }
-
-  //   // Send verification code and show popup
-  //   await sendVerificationCode();
-  // };
 
   return (
     <div className="signup-section">
@@ -303,7 +242,7 @@ const Signup = () => {
         <div className="verification-popup">
           <div className="popup-content">
             <h3>Verify Your Email</h3>
-            <p>We've sent a verification code to your email. Please enter it below:</p>
+            <p>We've sent a verification code to your email (check junk). Please enter it below: </p>
             <input
               type="text"
               placeholder="Verification Code"
