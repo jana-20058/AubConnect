@@ -4,7 +4,6 @@ const postReview = async (req, res) => {
   const { reviewText, username } = req.body;
 
   try {
-    // Create a new review
     const review = new Review({
       reviewText,
       username,

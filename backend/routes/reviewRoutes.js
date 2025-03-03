@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
 // GET /api/reviews - Fetch all reviews
 router.get("/", async (req, res) => {
   try {
-    const reviews = await Review.find(); // Fetch reviews from the database
+    const reviews = await Review.find();
     res.status(200).json(reviews);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch reviews.", error: err.message });
@@ -28,13 +28,21 @@ router.get("/", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { username } = req.body; // Get the username from the request body
 
-    // Find and delete the review
-    const deletedReview = await Review.findByIdAndDelete(id);
-    if (!deletedReview) {
+    // Find the review
+    const review = await Review.findById(id);
+    if (!review) {
       return res.status(404).json({ message: "Review not found." });
     }
 
+    // Check if the logged-in user is the author
+    if (review.username !== username) {
+      return res.status(403).json({ message: "You are not authorized to delete this review." });
+    }
+
+    // Delete the review
+    await Review.findByIdAndDelete(id);
     res.status(200).json({ message: "Review deleted successfully!" });
   } catch (err) {
     res.status(500).json({ message: "Failed to delete review.", error: err.message });
@@ -47,21 +55,25 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const { type, title, rating, reviewText, username } = req.body;
 
-    // Find and delete the old review
-    const deletedReview = await Review.findByIdAndDelete(id);
-    if (!deletedReview) {
+    const review = await Review.findById(id);
+    if (!review) {
       return res.status(404).json({ message: "Review not found." });
     }
 
-    // Create a new review with the updated data
-    const newReview = new Review({ type, title, rating, reviewText, username });
-    await newReview.save();
+    if (review.username !== username) {
+      return res.status(403).json({ message: "You are not authorized to edit this review." });
+    }
 
-    res.status(200).json({ message: "Review updated successfully!", review: newReview });
+    const updatedReview = await Review.findByIdAndUpdate(
+      id,
+      { type, title, rating, reviewText },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Review updated successfully!", review: updatedReview });
   } catch (err) {
     res.status(500).json({ message: "Failed to update review.", error: err.message });
   }
 });
-
 
 module.exports = router;

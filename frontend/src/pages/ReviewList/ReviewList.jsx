@@ -6,7 +6,8 @@ import "./ReviewList.css";
 const ReviewList = () => {
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [success, setSuccess] = useState(""); // Add success state
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newReview, setNewReview] = useState({
     type: "course",
     title: "",
@@ -14,8 +15,10 @@ const ReviewList = () => {
     reviewText: "",
     anonymous: false,
   });
+  const [editReviewId, setEditReviewId] = useState(null);
+  const [loggedInUsername, setLoggedInUsername] = useState("");
 
-  // Fetch reviews from the backend when the component mounts
+  // Fetch reviews and set logged-in username
   useEffect(() => {
     const fetchReviews = async () => {
       try {
@@ -28,30 +31,30 @@ const ReviewList = () => {
     };
 
     fetchReviews();
+
+    // Set the logged-in username
+    const username = getUsernameFromToken();
+    if (username) {
+      setLoggedInUsername(username);
+    }
   }, []);
 
   // Function to get the username from the JWT token
   const getUsernameFromToken = () => {
     const token = localStorage.getItem("token");
-    console.log("Token from localStorage:", token); // Debugging log
-  
     if (!token) {
       setError("You must be logged in to post a review.");
       return null;
     }
-  
+
     try {
       const decoded = jwtDecode(token);
-      console.log("Decoded token:", decoded); // Debugging log
-      return decoded.username; // Retrieve the username from the token
+      return decoded.username;
     } catch (err) {
-      console.error("Error decoding token:", err); // Debugging log
       setError("Invalid token. Please log in again.");
       return null;
     }
   };
-
-  
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -67,17 +70,23 @@ const ReviewList = () => {
 
   const submitReview = async () => {
     const username = getUsernameFromToken();
-    if (!username) return; // Stop if username is not available
+    if (!username) return;
 
     try {
       const reviewData = {
         ...newReview,
-        username: newReview.anonymous ? "Anonymous" : username, // Include the username (or "Anonymous")
+        username: newReview.anonymous ? "Anonymous" : username,
       };
 
-      // Submit a new review
-      const response = await axios.post("http://localhost:5001/api/reviews", reviewData);
-      console.log("Review submitted:", response.data);
+      if (editReviewId) {
+        // Update the review
+        const response = await axios.put(`http://localhost:5001/api/reviews/${editReviewId}`, reviewData);
+        console.log("Review updated:", response.data);
+      } else {
+        // Submit a new review
+        const response = await axios.post("http://localhost:5001/api/reviews", reviewData);
+        console.log("Review submitted:", response.data);
+      }
 
       // Fetch updated reviews
       const reviewsResponse = await axios.get("http://localhost:5001/api/reviews");
@@ -91,12 +100,44 @@ const ReviewList = () => {
         reviewText: "",
         anonymous: false,
       });
+      setEditReviewId(null);
       setIsModalOpen(false);
 
-      setSuccess("Review posted successfully!");
+      setSuccess(editReviewId ? "Review updated successfully!" : "Review posted successfully!");
+      setTimeout(() => setSuccess(""), 3000); // Clear success message after 3 seconds
     } catch (err) {
       setError("Failed to submit review.");
       console.error("Error submitting review:", err);
+    }
+  };
+
+  const handleEditReview = (id) => {
+    const reviewToEdit = reviews.find((review) => review._id === id);
+    if (reviewToEdit) {
+      setNewReview(reviewToEdit);
+      setEditReviewId(id);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleDeleteReview = async (id) => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this review?");
+    if (!isConfirmed) return;
+
+    const username = getUsernameFromToken();
+    if (!username) return;
+
+    try {
+      await axios.delete(`http://localhost:5001/api/reviews/${id}`, {
+        data: { username },
+      });
+      const updatedReviews = reviews.filter((review) => review._id !== id);
+      setReviews(updatedReviews);
+      setSuccess("Review deleted successfully!"); // Set success message
+      setTimeout(() => setSuccess(""), 3000); // Clear success message after 3 seconds
+    } catch (err) {
+      setError("Failed to delete review.");
+      console.error("Error deleting review:", err);
     }
   };
 
@@ -104,6 +145,7 @@ const ReviewList = () => {
     <div className="review-list-page">
       <h1>Reviews</h1>
       {error && <p className="error-message">{error}</p>}
+      {success && <p className="success-message">{success}</p>} {/* Display success message */}
 
       {/* Button to open the modal */}
       <button onClick={() => setIsModalOpen(true)} className="add-review-button">
@@ -114,7 +156,7 @@ const ReviewList = () => {
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>Submit a Review</h2>
+            <h2>{editReviewId ? "Edit Review" : "Submit a Review"}</h2>
             <div className="review-form">
               <div className="form-group">
                 <label>Review Type:</label>
@@ -167,7 +209,9 @@ const ReviewList = () => {
                   Submit Anonymously
                 </label>
               </div>
-              <button onClick={submitReview}>Submit Review</button>
+              <button onClick={submitReview}>
+                {editReviewId ? "Update Review" : "Submit Review"}
+              </button>
               <button onClick={() => setIsModalOpen(false)}>Cancel</button>
             </div>
           </div>
@@ -192,6 +236,16 @@ const ReviewList = () => {
               ))}
             </div>
             <p>{review.reviewText}</p>
+            {review.username === loggedInUsername && (
+              <div className="actions">
+                <button onClick={() => handleEditReview(review._id)} className="action-btn">
+                  Edit
+                </button>
+                <button onClick={() => handleDeleteReview(review._id)} className="action-btn">
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
