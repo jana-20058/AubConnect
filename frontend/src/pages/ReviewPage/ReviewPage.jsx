@@ -64,20 +64,30 @@ const ReviewPage = () => {
   const submitReview = async () => {
     const username = getUsernameFromToken();
     if (!username) return; // Stop if username is not available
-
+  
     try {
       const reviewData = {
         ...newReview,
         username: newReview.anonymous ? "Anonymous" : username, // Include the username (or "Anonymous")
       };
-
-      const response = await axios.post("http://localhost:5001/api/reviews", reviewData);
-      console.log("Review submitted:", response.data);
-
+  
+      if (editReviewId !== null) {
+        // Update the review (delete the old one and create a new one)
+        const response = await axios.put(`http://localhost:5001/api/reviews/${editReviewId}`, reviewData);
+        console.log("Review updated:", response.data);
+  
+        // Reset the edit state
+        setEditReviewId(null);
+      } else {
+        // Submit a new review
+        const response = await axios.post("http://localhost:5001/api/reviews", reviewData);
+        console.log("Review submitted:", response.data);
+      }
+  
       // Fetch updated reviews
       const reviewsResponse = await axios.get("http://localhost:5001/api/reviews");
       setReviews(reviewsResponse.data);
-
+  
       // Reset the form
       setNewReview({
         type: "course",
@@ -86,8 +96,8 @@ const ReviewPage = () => {
         reviewText: "",
         anonymous: false,
       });
-
-      setSuccess("Review posted successfully!");
+  
+      setSuccess(editReviewId !== null ? "Review updated successfully!" : "Review posted successfully!");
     } catch (err) {
       setError("Failed to submit review.");
       console.error("Error submitting review:", err);

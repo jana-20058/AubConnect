@@ -41,5 +41,27 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// PUT /api/reviews/:id - Update a review
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type, title, rating, reviewText, username } = req.body;
+
+    // Find and delete the old review
+    const deletedReview = await Review.findByIdAndDelete(id);
+    if (!deletedReview) {
+      return res.status(404).json({ message: "Review not found." });
+    }
+
+    // Create a new review with the updated data
+    const newReview = new Review({ type, title, rating, reviewText, username });
+    await newReview.save();
+
+    res.status(200).json({ message: "Review updated successfully!", review: newReview });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update review.", error: err.message });
+  }
+});
+
 
 module.exports = router;
