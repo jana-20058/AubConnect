@@ -109,7 +109,12 @@ const login = async (req, res) => {
     const payload = { userId: user._id };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token });
+    // Return success response with redirect URL
+    res.status(200).json({ 
+      message: 'Login successful', 
+      token, 
+      redirectUrl: "/homepage" // Redirect to the homepage
+    });
   } catch (err) {
     console.error('Error during login:', err);
     res.status(500).json({ message: 'Server error occurred', error: err.message });
