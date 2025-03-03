@@ -65,6 +65,10 @@ const ReviewPage = () => {
     const username = getUsernameFromToken();
     if (!username) return; // Stop if username is not available
   
+    // Show a confirmation pop-up
+    const isConfirmed = window.confirm("Are you sure you want to submit this review?");
+    if (!isConfirmed) return; // Stop if the user cancels the confirmation
+  
     try {
       const reviewData = {
         ...newReview,
