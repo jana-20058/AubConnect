@@ -1,5 +1,8 @@
 .review-list-page {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full height of the viewport */
 }
 
 .add-review-button {
@@ -17,21 +20,32 @@
   background-color: #45a049;
 }
 
+/* Scrollable container for reviews */
 .reviews-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.review-card {
-  padding: 20px;
+  flex: 1; /* Take up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling */
   border: 1px solid #ddd;
   border-radius: 8px;
+  padding: 10px;
   background-color: #f9f9f9;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns per row */
+  gap: 15px; /* Space between reviews */
+}
+
+/* Individual review card */
+.review-card {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .review-title {
   margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .rating {
@@ -41,7 +55,6 @@
 .star {
   font-size: 20px;
   color: #ccc;
-  cursor: pointer;
 }
 
 .star.filled {
@@ -99,21 +112,6 @@
 
 .form-group textarea {
   height: 100px;
-}
-
-.rating {
-  display: flex;
-  gap: 5px;
-}
-
-.star {
-  font-size: 24px;
-  color: #ccc;
-  cursor: pointer;
-}
-
-.star.filled {
-  color: #ffd700;
 }
 
 button {
