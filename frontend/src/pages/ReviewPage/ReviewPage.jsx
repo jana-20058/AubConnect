@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+// import jwtDecode from "jwt-decode"; // Install this library to decode JWT tokens
+import { jwtDecode } from "jwt-decode";
 import "./ReviewPage.css";
 
 const ReviewPage = () => {
@@ -11,6 +14,40 @@ const ReviewPage = () => {
     anonymous: false,
   });
   const [editReviewId, setEditReviewId] = useState(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Function to get the username from the JWT token
+  const getUsernameFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("You must be logged in to post a review.");
+      return null;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+      return decoded.username; // Retrieve the username from the token
+    } catch (err) {
+      setError("Invalid token. Please log in again.");
+      return null;
+    }
+  };
+
+  // Fetch reviews from the backend when the component mounts
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get("http://localhost:5001/api/reviews");
+        setReviews(response.data);
+      } catch (err) {
+        setError("Failed to fetch reviews.");
+        console.error("Error fetching reviews:", err);
+      }
+    };
+  
+    fetchReviews();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -24,61 +61,77 @@ const ReviewPage = () => {
     setNewReview({ ...newReview, rating });
   };
 
-  const submitReview = () => {
-    if (editReviewId !== null) {
-      const updatedReviews = reviews.map((review) =>
-        review.id === editReviewId ? { ...review, ...newReview } : review
-      );
-      setReviews(updatedReviews);
-      setEditReviewId(null);
-    } else {
-      const review = { ...newReview, id: Date.now(), upvotes: 0, downvotes: 0 };
-      setReviews([...reviews, review]);
+  const submitReview = async () => {
+    const username = getUsernameFromToken();
+    if (!username) return; // Stop if username is not available
+  
+    try {
+      const reviewData = {
+        ...newReview,
+        username: newReview.anonymous ? "Anonymous" : username, // Include the username (or "Anonymous")
+      };
+  
+      const response = await axios.post("http://localhost:5001/api/reviews", reviewData);
+      console.log("Review submitted:", response.data);
+  
+      // Fetch updated reviews
+      const reviewsResponse = await axios.get("http://localhost:5001/api/reviews");
+      setReviews(reviewsResponse.data);
+  
+      // Reset the form
+      setNewReview({
+        type: "course",
+        title: "",
+        rating: 0,
+        reviewText: "",
+        anonymous: false,
+      });
+  
+      setSuccess("Review posted successfully!");
+    } catch (err) {
+      setError("Failed to submit review.");
+      console.error("Error submitting review:", err);
     }
-    setNewReview({
-      type: "course",
-      title: "",
-      rating: 0,
-      reviewText: "",
-      anonymous: false,
-    });
   };
 
   const editReview = (id) => {
-    const reviewToEdit = reviews.find((review) => review.id === id);
+    const reviewToEdit = reviews.find((review) => review._id === id);
     setNewReview(reviewToEdit);
     setEditReviewId(id);
   };
 
-  const deleteReview = (id) => {
-    const updatedReviews = reviews.filter((review) => review.id !== id);
-    setReviews(updatedReviews);
+  const deleteReview = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5001/api/reviews/${id}`);
+      const updatedReviews = reviews.filter((review) => review._id !== id);
+      setReviews(updatedReviews);
+      setSuccess("Review deleted successfully!");
+    } catch (err) {
+      setError("Failed to delete review.");
+      console.error("Error deleting review:", err);
+    }
   };
 
-  const handleVote = (id, type) => {
-    const updatedReviews = reviews.map((review) =>
-      review.id === id
-        ? {
-            ...review,
-            upvotes: type === "upvote" ? review.upvotes + 1 : review.upvotes,
-            downvotes: type === "downvote" ? review.downvotes + 1 : review.downvotes,
-          }
-        : review
-    );
-    setReviews(updatedReviews);
+  const handleVote = async (id, type) => {
+    try {
+      await axios.post(`http://localhost:5001/api/reviews/${id}/vote`, { type });
+      const response = await axios.get("http://localhost:5001/api/reviews");
+      setReviews(response.data);
+    } catch (err) {
+      setError("Failed to vote.");
+      console.error("Error voting:", err);
+    }
   };
 
   return (
     <div className="review-page">
       <h1 className="header">AUB Review Hub</h1>
+      {error && <p className="error-message">{error}</p>}
+      {success && <p className="success-message">{success}</p>}
       <div className="review-form">
         <div className="form-group">
           <label>Review Type:</label>
-          <select
-            name="type"
-            value={newReview.type}
-            onChange={handleInputChange}
-          >
+          <select name="type" value={newReview.type} onChange={handleInputChange}>
             <option value="course">Course</option>
             <option value="professor">Professor</option>
           </select>
@@ -135,9 +188,9 @@ const ReviewPage = () => {
       <div className="reviews-list">
         <h2>Latest Reviews</h2>
         {reviews.map((review) => (
-          <div key={review.id} className="review-card">
+          <div key={review._id} className="review-card">
             <h3 className="review-title">
-              {review.anonymous ? "Anonymous" : "User"} - {review.title} ({review.type})
+              {review.username} - {review.title} ({review.type})
             </h3>
             <div className="rating">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -151,10 +204,18 @@ const ReviewPage = () => {
             </div>
             <p>{review.reviewText}</p>
             <div className="actions">
-              <button onClick={() => editReview(review.id)} className="action-btn">Edit</button>
-              <button onClick={() => deleteReview(review.id)} className="action-btn">Delete</button>
-              <button onClick={() => handleVote(review.id, "upvote")} className="vote-btn">Upvote ({review.upvotes})</button>
-              <button onClick={() => handleVote(review.id, "downvote")} className="vote-btn">Downvote ({review.downvotes})</button>
+              <button onClick={() => editReview(review._id)} className="action-btn">
+                Edit
+              </button>
+              <button onClick={() => deleteReview(review._id)} className="action-btn">
+                Delete
+              </button>
+              <button onClick={() => handleVote(review._id, "upvote")} className="vote-btn">
+                Upvote ({review.upvotes || 0})
+              </button>
+              <button onClick={() => handleVote(review._id, "downvote")} className="vote-btn">
+                Downvote ({review.downvotes || 0})
+              </button>
             </div>
           </div>
         ))}

@@ -105,20 +105,54 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials - Incorrect password', error: 'INCORRECT_PASSWORD' });
     }
 
-    // Generate JWT
-    const payload = { userId: user._id };
+    // Generate JWT with user's username included
+    const payload = { 
+      userId: user._id,
+      username: user.username, // Include the username in the token
+    };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     // Return success response with redirect URL
     res.status(200).json({ 
       message: 'Login successful', 
       token, 
-      redirectUrl: "/homepage" // Redirect to the homepage
+      redirectUrl: "/homepage" 
     });
   } catch (err) {
     console.error('Error during login:', err);
     res.status(500).json({ message: 'Server error occurred', error: err.message });
   }
 };
+// const login = async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     // Check if user exists
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(400).json({ message: 'Invalid credentials - User not found', error: 'USER_NOT_FOUND' });
+//     }
+
+//     // Compare passwords
+//     const isMatch = await user.comparePassword(password);
+//     if (!isMatch) {
+//       return res.status(400).json({ message: 'Invalid credentials - Incorrect password', error: 'INCORRECT_PASSWORD' });
+//     }
+
+//     // Generate JWT
+//     const payload = { userId: user._id };
+//     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+//     // Return success response with redirect URL
+//     res.status(200).json({ 
+//       message: 'Login successful', 
+//       token, 
+//       redirectUrl: "/homepage" // Redirect to the homepage
+//     });
+//   } catch (err) {
+//     console.error('Error during login:', err);
+//     res.status(500).json({ message: 'Server error occurred', error: err.message });
+//   }
+// };
 
 module.exports = { sendVerificationCode, verifyCode, login };
