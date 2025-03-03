@@ -13,19 +13,20 @@ const Homepage = () => {
           <input type="text" placeholder="Search by Course..." />
         </div>
         <nav className="nav-links">
-          <Link to="/post-review">Post a Review</Link>
+          {/* Update the "Post a Review" Link to point to /reviews */}
+          <Link to="/reviews">Post a Review</Link>
           <Link to="/profile">Profile</Link>
           <Link to="/logout">Log Out</Link>
         </nav>
       </header>
-      
+
       <div className="container">
         <aside className="sidebar">
           <p className="username">User's Name</p>
           <Link to="/saved">Saved</Link>
           <Link to="/settings">Settings</Link>
         </aside>
-        
+
         <main className="main-content">
           <section className="recent-reviews">
             <h2>Recent Reviews</h2>
@@ -46,7 +47,7 @@ const Homepage = () => {
           </section>
         </main>
       </div>
-      
+
       <footer className="footer">
         <p>&copy; 2025 AUBConnect. All rights reserved.</p>
       </footer>
