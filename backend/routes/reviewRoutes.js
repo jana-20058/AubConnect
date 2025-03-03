@@ -24,6 +24,22 @@ router.get("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+// DELETE /api/reviews/:id - Delete a review
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the review
+    const deletedReview = await Review.findByIdAndDelete(id);
+    if (!deletedReview) {
+      return res.status(404).json({ message: "Review not found." });
+    }
+
+    res.status(200).json({ message: "Review deleted successfully!" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete review.", error: err.message });
+  }
+});
+
 
 module.exports = router;

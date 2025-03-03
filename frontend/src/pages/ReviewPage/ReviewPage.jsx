@@ -45,7 +45,7 @@ const ReviewPage = () => {
         console.error("Error fetching reviews:", err);
       }
     };
-  
+
     fetchReviews();
   }, []);
 
@@ -64,20 +64,20 @@ const ReviewPage = () => {
   const submitReview = async () => {
     const username = getUsernameFromToken();
     if (!username) return; // Stop if username is not available
-  
+
     try {
       const reviewData = {
         ...newReview,
         username: newReview.anonymous ? "Anonymous" : username, // Include the username (or "Anonymous")
       };
-  
+
       const response = await axios.post("http://localhost:5001/api/reviews", reviewData);
       console.log("Review submitted:", response.data);
-  
+
       // Fetch updated reviews
       const reviewsResponse = await axios.get("http://localhost:5001/api/reviews");
       setReviews(reviewsResponse.data);
-  
+
       // Reset the form
       setNewReview({
         type: "course",
@@ -86,7 +86,7 @@ const ReviewPage = () => {
         reviewText: "",
         anonymous: false,
       });
-  
+
       setSuccess("Review posted successfully!");
     } catch (err) {
       setError("Failed to submit review.");
@@ -102,9 +102,14 @@ const ReviewPage = () => {
 
   const deleteReview = async (id) => {
     try {
+      // Send a DELETE request to the backend
       await axios.delete(`http://localhost:5001/api/reviews/${id}`);
+
+      // Remove the deleted review from the local state
       const updatedReviews = reviews.filter((review) => review._id !== id);
       setReviews(updatedReviews);
+
+      // Show a success message
       setSuccess("Review deleted successfully!");
     } catch (err) {
       setError("Failed to delete review.");
