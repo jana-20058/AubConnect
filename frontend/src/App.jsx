@@ -4,7 +4,7 @@ import Homepage from "./pages/Homepage/Homepage";
 import Signup from "./pages/Signup/Signup";
 import Login from "./pages/Login/Login";
 import AboutUs from "./pages/AboutUs/AboutUs";
-import ReviewPage from "./pages/ReviewPage/ReviewPage";
+import ReviewList from "./pages/ReviewList/ReviewList"; // Import the new ReviewList component
 
 const App = () => {
   return (
@@ -14,7 +14,7 @@ const App = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/homepage" element={<Homepage />} />
         <Route path="/about" element={<AboutUs />} />
-        <Route path="/reviews" element={<ReviewPage />} />
+        <Route path="/reviews" element={<ReviewList />} /> {/* Use ReviewList instead of ReviewPage */}
       </Routes>
     </Router>
   );
