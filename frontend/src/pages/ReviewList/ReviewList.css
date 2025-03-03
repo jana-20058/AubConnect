@@ -9,7 +9,7 @@
   display: inline-block;
   margin-bottom: 20px;
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: #860033;
   color: white;
   border: none;
   border-radius: 4px;
@@ -17,7 +17,7 @@
 }
 
 .add-review-button:hover {
-  background-color: #45a049;
+  background-color: #860033;
 }
 
 /* Scrollable container for reviews */
@@ -122,7 +122,7 @@
 
 button {
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: #860033;
   color: white;
   border: none;
   border-radius: 4px;
@@ -130,7 +130,7 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #860033;
 }
 
 .error-message {
@@ -150,7 +150,7 @@ button:hover {
 
 .action-btn {
   padding: 5px 10px;
-  background-color: #007bff;
+  background-color: #860033;
   color: white;
   border: none;
   border-radius: 4px;
@@ -158,5 +158,24 @@ button:hover {
 }
 
 .action-btn:hover {
-  background-color: #0056b3;
+  background-color: #860033;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.vote-buttons button {
+  padding: 5px 10px;
+  background-color: #860033;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.vote-buttons button:hover {
+  background-color: #860033;
 }

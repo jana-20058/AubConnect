@@ -7,13 +7,11 @@ const Homepage = () => {
     <div className="homepage">
       <header className="navbar">
         <div className="logo">AUBConnect</div>
-        <div className="spacer"></div>
         <div className="search-bar">
           <input type="text" placeholder="Search by Professor..." />
           <input type="text" placeholder="Search by Course..." />
         </div>
         <nav className="nav-links">
-          {/* Update the "Post a Review" Link to point to /reviews */}
           <Link to="/reviews">Post a Review</Link>
           <Link to="/profile">Profile</Link>
           <Link to="/logout">Log Out</Link>
@@ -32,15 +30,26 @@ const Homepage = () => {
             <h2>Recent Reviews</h2>
             <div className="review-card">
               <h3>Course: CMPS 202</h3>
-              <p>Rating: ⭐⭐⭐⭐☆</p>
-              <p>"Great course! Highly recommended."</p>
-              <Link to="/review-details">Read More →</Link>
+              <div className="review-rating">
+                <span>Rating:</span>
+                <div className="stars">
+                  <span>⭐</span>
+                  <span>⭐</span>
+                  <span>⭐</span>
+                  <span>⭐</span>
+                  <span>☆</span>
+                </div>
+              </div>
+              <p className="review-text">"Great course! Highly recommended."</p>
+              <Link to="/review-details" className="read-more">
+                Read More →
+              </Link>
               <div className="review-actions">
                 <button className="like-btn">
-                  <i className="fas fa-thumbs-up"></i> <span>(12)</span>
+                  <i className="fas fa-thumbs-up"></i>
                 </button>
                 <button className="comment-btn">
-                  <i className="fas fa-comment"></i> <span>(5)</span>
+                  <i className="fas fa-comment"></i>
                 </button>
               </div>
             </div>

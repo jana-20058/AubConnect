@@ -6,7 +6,7 @@ import "./ReviewList.css";
 const ReviewList = () => {
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // Add success state
+  const [success, setSuccess] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newReview, setNewReview] = useState({
     type: "course",
@@ -53,6 +53,56 @@ const ReviewList = () => {
     } catch (err) {
       setError("Invalid token. Please log in again.");
       return null;
+    }
+  };
+
+  // Handle upvote
+  const handleUpvote = async (id) => {
+    try {
+      const username = getUsernameFromToken();
+      if (!username) return;
+
+      const response = await axios.post(
+        `http://localhost:5001/api/reviews/${id}/upvote`,
+        { username },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review._id === id ? response.data.review : review
+        )
+      );
+    } catch (err) {
+      setError("Failed to upvote review.");
+      console.error("Error upvoting review:", err);
+    }
+  };
+
+  // Handle downvote
+  const handleDownvote = async (id) => {
+    try {
+      const username = getUsernameFromToken();
+      if (!username) return;
+
+      const response = await axios.post(
+        `http://localhost:5001/api/reviews/${id}/downvote`,
+        { username },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review._id === id ? response.data.review : review
+        )
+      );
+    } catch (err) {
+      setError("Failed to downvote review.");
+      console.error("Error downvoting review:", err);
     }
   };
 
@@ -145,7 +195,7 @@ const ReviewList = () => {
     <div className="review-list-page">
       <h1>Reviews</h1>
       {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>} {/* Display success message */}
+      {success && <p className="success-message">{success}</p>}
 
       {/* Button to open the modal */}
       <button onClick={() => setIsModalOpen(true)} className="add-review-button">
@@ -236,6 +286,14 @@ const ReviewList = () => {
               ))}
             </div>
             <p>{review.reviewText}</p>
+            <div className="vote-buttons">
+              <button onClick={() => handleUpvote(review._id)}>
+                👍 {review.upvotes?.length || 0}
+              </button>
+              <button onClick={() => handleDownvote(review._id)}>
+                👎 {review.downvotes?.length || 0}
+              </button>
+            </div>
             {review.username === loggedInUsername && (
               <div className="actions">
                 <button onClick={() => handleEditReview(review._id)} className="action-btn">
